@@ -90,6 +90,9 @@ class CalendarInstance private constructor() {
     }
 
 
+    /**
+     * 未完成，判断日期是否在选择区间内
+     */
     fun isCanChoice(choice: ChoiceDate): Boolean {
         if (choice.year.year > startDate.year.year && choice.year.year < endDate.year.year) {
             return true
