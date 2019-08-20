@@ -1,5 +1,8 @@
 package cn.logcode.calendar.test
 
+import cn.logcode.calendar.CalendarInstance
+import cn.logcode.calendar.Utils
+import cn.logcode.calendar.date.ChoiceDate
 import cn.logcode.calendar.date.Year
 import java.util.*
 
@@ -15,9 +18,33 @@ import java.util.*
  * @remark:
  */
 fun main(args: Array<String>) {
-    var calendar = Calendar.getInstance()
+    var temp =  CalendarInstance.init(Utils.getCalendar())
 
-    System.out.println(calendar[Calendar.MONTH])
+    temp.dateChangeListener = {
+        System.out.println("时间改变："+Utils.dateToString(Utils.getCalendar(it).time))
+    }
+
+    var end = Utils.getCalendar()
+    end[Calendar.YEAR] = 2020
+    temp.setEndDateInterval(ChoiceDate.instance(end))
+//
+    end[Calendar.YEAR] = 2018
+    temp.setStratDateInterval(ChoiceDate.instance(end))
+
+
+
+    System.out.println()
+
+    System.out.println(Utils.dateToString(temp.startDate))
+    System.out.println(Utils.dateToString(temp.currentChoiceDate))
+    System.out.println(Utils.dateToString(temp.endDate))
+
+
+    temp.lastYear()
+    temp.nextMonth()
+    temp.nextYear()
+    temp.nextYear()
+
 
 }
 

@@ -1,5 +1,6 @@
 package cn.logcode.calendar
 
+import cn.logcode.calendar.date.ChoiceDate
 import java.text.SimpleDateFormat
 import java.time.Year
 import java.util.*
@@ -36,6 +37,20 @@ class Utils {
             calendar.time = date
             return calendar
         }
+        fun getCalendar(choice: ChoiceDate): Calendar {
+            var calendar = Calendar.getInstance()
+            calendar[Calendar.YEAR] = choice.year.year
+            calendar[Calendar.MONTH] = choice.month.month-1
+            calendar[Calendar.DAY_OF_MONTH] = choice.day.day
+
+            calendar[Calendar.MINUTE] = 0
+            calendar[Calendar.HOUR_OF_DAY] = 0
+            calendar[Calendar.SECOND] = 0
+            calendar[Calendar.MILLISECOND] = 0
+
+            return calendar
+        }
+
 
         fun getTodayDate(): Date {
             return Date()
@@ -54,6 +69,13 @@ class Utils {
                 return date
             }
             throw NullPointerException("格式化异常")
+        }
+
+        fun dateToString(choice: ChoiceDate): String {
+            return dateToString(choice, datePattern)
+        }
+        fun dateToString(choice: ChoiceDate, pattern: String): String {
+            return dateToString(getCalendar(choice).time, pattern)
         }
 
         fun dateToString(): String {

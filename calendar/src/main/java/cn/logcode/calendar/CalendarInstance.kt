@@ -14,34 +14,36 @@ import java.util.*
  * @remark:
  */
 class CalendarInstance private constructor() {
-    private
+
     lateinit var calendar: Calendar
+
+    //时间比较严格模式
+    var strictMode = false
 
     /**
      * 当前选择的日期
      */
-    private
-    lateinit var choiceDate: ChoiceDate
+
+    lateinit var currentChoiceDate: ChoiceDate
 
     /**
      * 日期改变的监听
      */
-    lateinit var dateChangeListener: (year: Year, month: Month, day: Day) -> Unit
+    lateinit var dateChangeListener: (date: ChoiceDate) -> Unit
 
     /**
      * 日期显示时间段
      */
-    private lateinit var startDate: ChoiceDate
-    private lateinit var endDate: ChoiceDate
+    lateinit var startDate: ChoiceDate
+    lateinit var endDate: ChoiceDate
 
     companion object {
         fun init(calendar: Calendar): CalendarInstance {
             val calendarInstance = CalendarInstance()
             calendarInstance.calendar = calendar
-            calendarInstance.choiceDate = ChoiceDate.instance(calendar)
-
-            calendarInstance.startDate = ChoiceDate(calendarInstance.choiceDate.year, calendarInstance.choiceDate.year.firstMonth, calendarInstance.choiceDate.year.firstMonth.firstDay)
-            calendarInstance.endDate = ChoiceDate(calendarInstance.choiceDate.year, calendarInstance.choiceDate.year.lastMonth, calendarInstance.choiceDate.year.lastMonth.lastDay)
+            calendarInstance.currentChoiceDate = ChoiceDate.instance(calendar)
+            calendarInstance.startDate = ChoiceDate(calendarInstance.currentChoiceDate.year, calendarInstance.currentChoiceDate.year.firstMonth, calendarInstance.currentChoiceDate.year.firstMonth.firstDay)
+            calendarInstance.endDate = ChoiceDate(calendarInstance.currentChoiceDate.year, calendarInstance.currentChoiceDate.year.lastMonth, calendarInstance.currentChoiceDate.year.lastMonth.lastDay)
 
             return calendarInstance
         }
@@ -63,18 +65,19 @@ class CalendarInstance private constructor() {
 
     @Throws(IllegalStateException::class)
     fun setDateInterval(start: ChoiceDate, end: ChoiceDate): CalendarInstance {
-
         when {
             start.year.year > end.year.year -> throw IllegalStateException("开始时间不能大于结束时间")
             start.year.year == end.year.year && start.month.month > end.month.month -> throw IllegalStateException("开始时间不能大于结束时间")
             start.year.year == end.year.year && start.month.month == end.month.month && start.day.day > end.day.day -> throw IllegalStateException("开始时间不能大于结束时间")
         }
-
         startDate = start
         endDate = end
         return this
     }
 
+    /**
+     * 设置可选的开始结束时间
+     */
     fun setDateInterval(start: Calendar, end: Calendar): CalendarInstance {
         setDateInterval(ChoiceDate.instance(start), ChoiceDate.instance(end))
         return this
@@ -89,23 +92,98 @@ class CalendarInstance private constructor() {
         return this
     }
 
+    fun setEndDateInterval(end: ChoiceDate): CalendarInstance{
+        return setDateInterval(startDate,end)
+    }
+    fun setStratDateInterval(start: ChoiceDate): CalendarInstance{
+        return setDateInterval(start,endDate)
+    }
 
     /**
      * 未完成，判断日期是否在选择区间内
      */
     fun isCanChoice(choice: ChoiceDate): Boolean {
-        if (choice.year.year > startDate.year.year && choice.year.year < endDate.year.year) {
+        var startTime: Long = Utils.getCalendar(startDate).time.time
+        var choiceTime: Long = Utils.getCalendar(choice).time.time
+        var endTime: Long = Utils.getCalendar(endDate).time.time
+
+        if (strictMode && (choiceTime in (startTime + 1)..(endTime - 1))) {
+            return true
+        } else if (choiceTime in startTime..endTime) {
             return true
         }
-
-        if(choice.year.year == startDate.year.year && choice.year.year < endDate.year.year && choice.month.month > startDate.month.month){
-            return true
-        }
-
-
-
         return false
     }
 
+
+    /**
+     * 下一年
+     */
+    fun nextYear() {
+        if (dateChangeListener != null && isCanNext(true)) {
+            currentChoiceDate = currentChoiceDate.nextYear()
+            dateChangeListener(currentChoiceDate)
+        }
+    }
+
+    /**
+     * 下一月
+     */
+    fun nextMonth() {
+        if (dateChangeListener != null && isCanNext()) {
+            currentChoiceDate = currentChoiceDate.nextMonth()
+            dateChangeListener(currentChoiceDate)
+        }
+    }
+
+    /**
+     * 上一年
+     */
+    fun lastYear() {
+        if (dateChangeListener != null && isCanLast(true)) {
+            currentChoiceDate = currentChoiceDate.lastYear()
+            dateChangeListener(currentChoiceDate)
+        }
+    }
+
+    /**
+     * 上一月
+     */
+    fun lastMonth() {
+        if (dateChangeListener != null && isCanLast()) {
+            currentChoiceDate = currentChoiceDate.lastMonth()
+            dateChangeListener(currentChoiceDate)
+        }
+    }
+
+    /**
+     * 能否往上切换
+     */
+    fun isCanLast(isYear: Boolean = false): Boolean {
+        return when{
+            isYear -> startDate.year.year < currentChoiceDate.year.year
+            else->when{
+                startDate.year.year < currentChoiceDate.year.year->true
+                startDate.year.year == currentChoiceDate.year.year && startDate.month.month < currentChoiceDate.month.month->true
+                else -> false
+            }
+        }
+
+    }
+
+    /**
+     * 能都往下切换
+     */
+    fun isCanNext(isYear: Boolean = false): Boolean {
+        return when{
+            isYear -> endDate.year.year > currentChoiceDate.year.year
+            else->when{
+                endDate.year.year > currentChoiceDate.year.year->true
+                endDate.year.year == currentChoiceDate.year.year && endDate.month.month > currentChoiceDate.month.month->true
+                else->false
+            }
+        }
+
+    }
 
 }

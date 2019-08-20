@@ -1,5 +1,6 @@
 package cn.logcode.calendar.date
 
+import cn.logcode.calendar.Utils
 import java.util.*
 
 /**
@@ -21,6 +22,49 @@ data class ChoiceDate(val year: Year, val month: Month, val day: Day){
             val currentDay = Day.toDay(calendar[Calendar.DAY_OF_MONTH], currentMonth.month, calendar)
             return ChoiceDate(currentYear,currentMonth,currentDay)
         }
+    }
+
+    fun nextYear():ChoiceDate{
+        var calendar = Utils.getCalendar(this)
+        calendar[Calendar.YEAR] = calendar[Calendar.YEAR] + 1
+        calendar[Calendar.MONTH] = 0
+        calendar[Calendar.DAY_OF_MONTH] = 1
+        return instance(calendar)
+    }
+
+    fun nextMonth():ChoiceDate{
+        var calendar = Utils.getCalendar(this)
+        calendar[Calendar.MONTH] = calendar[Calendar.MONTH] + 1
+        calendar[Calendar.DAY_OF_MONTH] = 1
+        return instance(calendar)
+    }
+
+    fun nextDay():ChoiceDate{
+        var calendar = Utils.getCalendar(this)
+        calendar[Calendar.DAY_OF_MONTH] = calendar[Calendar.DAY_OF_MONTH] + 1
+        return instance(calendar)
+    }
+
+
+    fun lastYear():ChoiceDate{
+        var calendar = Utils.getCalendar(this)
+        calendar[Calendar.YEAR] = calendar[Calendar.YEAR] - 1
+        calendar[Calendar.MONTH] = 11
+        calendar[Calendar.DAY_OF_MONTH] = 1
+        return instance(calendar)
+    }
+
+    fun lastMonth():ChoiceDate{
+        var calendar = Utils.getCalendar(this)
+        calendar[Calendar.MONTH] = calendar[Calendar.MONTH] - 1
+        calendar[Calendar.DAY_OF_MONTH] = 1
+        return instance(calendar)
+    }
+
+    fun lastDay():ChoiceDate{
+        var calendar = Utils.getCalendar(this)
+        calendar[Calendar.DAY_OF_MONTH] = calendar[Calendar.DAY_OF_MONTH] - 1
+        return instance(calendar)
     }
 
 }
