@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
     temp.setEndDateInterval(ChoiceDate.instance(end))
 //
     end[Calendar.YEAR] = 2018
-    temp.setStratDateInterval(ChoiceDate.instance(end))
+    temp.setStartDateInterval(ChoiceDate.instance(end))
 
 
 

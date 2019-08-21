@@ -21,7 +21,7 @@ class CalendarInstance private constructor() {
     var strictMode = false
 
     /**
-     * 当前选择的日期
+     * 当前日期
      */
 
     lateinit var currentChoiceDate: ChoiceDate
@@ -72,6 +72,10 @@ class CalendarInstance private constructor() {
         }
         startDate = start
         endDate = end
+
+        if (!isCanChoice(currentChoiceDate)) {
+            currentChoiceDate = startDate
+        }
         return this
     }
 
@@ -95,7 +99,7 @@ class CalendarInstance private constructor() {
     fun setEndDateInterval(end: ChoiceDate): CalendarInstance{
         return setDateInterval(startDate,end)
     }
-    fun setStratDateInterval(start: ChoiceDate): CalendarInstance{
+    fun setStartDateInterval(start: ChoiceDate): CalendarInstance{
         return setDateInterval(start,endDate)
     }
 
@@ -120,7 +124,7 @@ class CalendarInstance private constructor() {
      * 下一年
      */
     fun nextYear() {
-        if (dateChangeListener != null && isCanNext(true)) {
+        if (isCanNext(true)) {
             currentChoiceDate = currentChoiceDate.nextYear()
             dateChangeListener(currentChoiceDate)
         }
@@ -130,7 +134,7 @@ class CalendarInstance private constructor() {
      * 下一月
      */
     fun nextMonth() {
-        if (dateChangeListener != null && isCanNext()) {
+        if (isCanNext()) {
             currentChoiceDate = currentChoiceDate.nextMonth()
             dateChangeListener(currentChoiceDate)
         }
@@ -140,7 +144,7 @@ class CalendarInstance private constructor() {
      * 上一年
      */
     fun lastYear() {
-        if (dateChangeListener != null && isCanLast(true)) {
+        if (isCanLast(true)) {
             currentChoiceDate = currentChoiceDate.lastYear()
             dateChangeListener(currentChoiceDate)
         }
@@ -150,7 +154,7 @@ class CalendarInstance private constructor() {
      * 上一月
      */
     fun lastMonth() {
-        if (dateChangeListener != null && isCanLast()) {
+        if (isCanLast()) {
             currentChoiceDate = currentChoiceDate.lastMonth()
             dateChangeListener(currentChoiceDate)
         }
@@ -172,7 +176,7 @@ class CalendarInstance private constructor() {
     }
 
     /**
-     * 能都往下切换
+     * 能否往下切换
      */
     fun isCanNext(isYear: Boolean = false): Boolean {
         return when{
@@ -184,6 +188,20 @@ class CalendarInstance private constructor() {
             }
         }
 
+    }
+
+    /**
+     * 是否是当前月
+     */
+    fun isCurrentMonth():Boolean{
+        return false
+    }
+
+    /**
+     * 是否今天
+     */
+    fun isCurrentToday():Boolean{
+        return false
     }
 
 }

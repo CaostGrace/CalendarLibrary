@@ -108,6 +108,11 @@ class Utils {
             return getCalendar(date)[Calendar.MONTH]
         }
 
+        fun getTodayDay(): Int {
+            return getCalendar()[Calendar.DAY_OF_MONTH]
+        }
+
+
         /**
          * 判断是否是闰年
          */
