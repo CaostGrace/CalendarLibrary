@@ -6,6 +6,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +29,7 @@ class CalendarView : LinearLayout {
 
 
     private var calendarInstance: CalendarInstance = CalendarInstance.init(Date())
+
     private lateinit var rootCalendarView: View
 
     private lateinit var monthText: TextView
@@ -57,7 +59,7 @@ class CalendarView : LinearLayout {
     /**
      * 选择时间回调
      */
-    private lateinit var choseDateListener: (year: Year, month: Month, day: Day) -> Unit
+    var choseDateListener: ((Year, Month, Day) -> Unit)? = null
 
     constructor(context: Context) : super(context) {
         createView()
@@ -147,6 +149,11 @@ class CalendarView : LinearLayout {
             leftButton.visibility = View.VISIBLE
         }
 
+        if(::currentChoseDate.isInitialized){
+            while (!canChoseWeek.contains(currentChoseDate.day.week)) {
+                currentChoseDate = currentChoseDate.nextDay()
+            }
+        }
 
         monthOfDayRecycler.adapter = MonthDayAdapter(context, calendarInstance.currentChoiceDate.month.days)
         monthOfDayRecycler.layoutManager = GridLayoutManager(context, 7, GridLayoutManager.VERTICAL, false)
@@ -186,6 +193,7 @@ class CalendarView : LinearLayout {
     fun addWeek(week: WeekEnum) {
         if (!canChoseWeek.contains(week)) {
             canChoseWeek.add(week)
+            initView()
         }
     }
 
@@ -193,7 +201,10 @@ class CalendarView : LinearLayout {
      * 移除可选周
      */
     fun removeWeek(week: WeekEnum) {
-        canChoseWeek.remove(week)
+        if (canChoseWeek.contains(week)) {
+            canChoseWeek.remove(week)
+            initView()
+        }
     }
 
     fun getCurrentYear(): String {
@@ -236,6 +247,12 @@ class CalendarView : LinearLayout {
         }
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
+
+            /**
+             * 日期能否选择
+             */
+            var isCanChoice = true
+
             reset(holder)
             if (position < jumpCount) {
                 return
@@ -251,12 +268,15 @@ class CalendarView : LinearLayout {
              * 日期不能选
              */
             if (!calendarInstance.isCanChoice(dayChoiceDate)) {
+                isCanChoice = false
                 holder.textView.setTextColor(ContextCompat.getColor(context, R.color.month_day_text_color_no_choice))
             }
+
             /**
              * 星期不能选
              */
             if (!canChoseWeek.contains(day.week)) {
+                isCanChoice = false
                 holder.textView.setTextColor(ContextCompat.getColor(context, R.color.month_day_text_color_no_choice))
             }
 
@@ -271,11 +291,30 @@ class CalendarView : LinearLayout {
              * 是否选中
              */
             if (dayChoiceDate == currentChoseDate) {
+
+                isCanChoice = false
                 holder.dayOfTheMonthBackground.setBackgroundResource(R.drawable.circle_ring)
                 holder.textView.setTextColor(ContextCompat.getColor(context, R.color.roboto_calendar_selected_day_font))
             }
 
+
+            holder.view.isClickable = true
+
+            holder.view.setOnClickListener {
+                Log.d("isCanChoice", isCanChoice.toString())
+                if (!isCanChoice) {
+                    return@setOnClickListener
+                }
+                currentChoseDate = dayChoiceDate
+//                initView()
+                if (choseDateListener != null) {
+                    choseDateListener?.let { it1 -> it1(dayChoiceDate.year, dayChoiceDate.month, dayChoiceDate.day) }
+                }
+                notifyDataSetChanged()
+            }
+
         }
+
 
         private fun reset(holder: Holder) {
             holder.dayOfTheMonthBackground.setBackgroundColor(Color.WHITE)

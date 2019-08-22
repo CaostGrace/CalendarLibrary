@@ -76,6 +76,8 @@ class CalendarInstance private constructor() {
         if (!isCanChoice(currentChoiceDate)) {
             currentChoiceDate = startDate
         }
+
+
         return this
     }
 

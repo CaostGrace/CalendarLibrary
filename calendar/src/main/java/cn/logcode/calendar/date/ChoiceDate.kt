@@ -15,6 +15,7 @@ import java.util.*
  */
 data class ChoiceDate(val year: Year, val month: Month, val day: Day) {
 
+
     companion object {
         fun instance(calendar: Calendar): ChoiceDate {
             val currentYear = Year.toYear(calendar)
