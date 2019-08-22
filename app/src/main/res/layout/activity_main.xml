@@ -7,10 +7,13 @@
     android:orientation="horizontal"
     tools:context=".MainActivity">
 
-    <cn.logcode.calendar.view.CalendarView
+    <TextView
         android:id="@+id/calendarPicker"
+        android:text="点击弹出日历"
+        android:gravity="center"
+        android:clickable="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </cn.logcode.calendar.view.CalendarView>
+        android:layout_height="50dp">
+    </TextView>
 
 </LinearLayout>

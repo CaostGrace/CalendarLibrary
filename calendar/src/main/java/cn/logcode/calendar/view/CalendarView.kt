@@ -55,6 +55,10 @@ class CalendarView : LinearLayout {
      */
     private lateinit var currentChoseDate: ChoiceDate
 
+    /**
+     * 没有时间可以选
+     */
+    private var noDate:Boolean = false
 
     /**
      * 选择时间回调
@@ -149,10 +153,19 @@ class CalendarView : LinearLayout {
             leftButton.visibility = View.VISIBLE
         }
 
+        noDate = false
         if(::currentChoseDate.isInitialized){
-            while (!canChoseWeek.contains(currentChoseDate.day.week)) {
+            //加入i防止每周都不选从而陷入死循环,还有问题，解决蓝色小圆圈初始化显示的问题
+            var i = 0
+            while (!canChoseWeek.contains(currentChoseDate.day.week)){
+                if(i>7){
+                    noDate = true
+                    break
+                }
+                i++
                 currentChoseDate = currentChoseDate.nextDay()
             }
+
         }
 
         monthOfDayRecycler.adapter = MonthDayAdapter(context, calendarInstance.currentChoiceDate.month.days)
@@ -205,6 +218,18 @@ class CalendarView : LinearLayout {
             canChoseWeek.remove(week)
             initView()
         }
+    }
+
+
+    fun setSelectedDay(time:Long){
+        var choiceDate = ChoiceDate.instance(Utils.getCalendar(Date(time)))
+        if(calendarInstance.isCanChoice(choiceDate)){
+            currentChoseDate = choiceDate
+            initView()
+        }else{
+            throw IllegalStateException("时间必须在开始时间与结束时间之内")
+        }
+
     }
 
     fun getCurrentYear(): String {
@@ -290,7 +315,7 @@ class CalendarView : LinearLayout {
             /**
              * 是否选中
              */
-            if (dayChoiceDate == currentChoseDate) {
+            if (dayChoiceDate == currentChoseDate && !noDate) {
 
                 isCanChoice = false
                 holder.dayOfTheMonthBackground.setBackgroundResource(R.drawable.circle_ring)
@@ -301,7 +326,6 @@ class CalendarView : LinearLayout {
             holder.view.isClickable = true
 
             holder.view.setOnClickListener {
-                Log.d("isCanChoice", isCanChoice.toString())
                 if (!isCanChoice) {
                     return@setOnClickListener
                 }
